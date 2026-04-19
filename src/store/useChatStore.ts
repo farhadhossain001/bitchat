@@ -100,12 +100,22 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   sendMessage: async (message) => {
-    const { error } = await supabase
+    const { data: newMessage, error } = await supabase
       .from('messages')
-      .insert([message]);
+      .insert([message])
+      .select()
+      .single();
       
     if (error) {
       console.error('Error sending message:', error);
+    } else if (newMessage) {
+      set((state) => {
+        // Check if realtime subscription already added it to prevent duplicates
+        if (!state.messages.some(m => m.id === newMessage.id)) {
+          return { messages: [...state.messages, newMessage] };
+        }
+        return state;
+      });
     }
   },
 
