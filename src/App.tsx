@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore';
+import { useThemeStore } from './store/useThemeStore';
 import { supabase } from './lib/supabase';
 
 // Pages
@@ -12,7 +13,7 @@ import Signup from './pages/Signup';
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthStore();
   
-  if (loading) return <div className="h-screen w-screen flex items-center justify-center bg-gray-50 text-gray-900">Loading...</div>;
+  if (loading) return <div className="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-gray-100 transition-colors duration-300">Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
   
   return <>{children}</>;
@@ -20,6 +21,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const { setUser, checkSession } = useAuthStore();
+  const { isDarkMode } = useThemeStore();
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     checkSession();
